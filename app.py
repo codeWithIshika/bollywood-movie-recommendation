@@ -31,27 +31,27 @@ vectorizer = TfidfVectorizer(
 
 tfidf_matrix = vectorizer.fit_transform(df["clean_text"])
 
-similarity_matrix = cosine_similarity(tfidf_matrix)
-
-
 def recommend(item_name, top_n=5):
     item_index = df[
         df["title_x"].str.lower() == item_name.lower()
     ].index[0]
 
-    similarity_scores = list(
-        enumerate(similarity_matrix[item_index])
-    )
+    similarity_scores = cosine_similarity(
+        tfidf_matrix[item_index],
+        tfidf_matrix
+    ).flatten()
 
-    similarity_scores = sorted(
-        similarity_scores,
+    similar_movies = list(enumerate(similarity_scores))
+
+    similar_movies = sorted(
+        similar_movies,
         key=lambda x: x[1],
         reverse=True
     )
 
     recommendations = []
 
-    for index, score in similarity_scores[1:top_n + 1]:
+    for index, score in similar_movies[1:top_n + 1]:
         recommendations.append(df.iloc[index]["title_x"])
 
     return recommendations
